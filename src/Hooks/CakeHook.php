@@ -8,7 +8,7 @@ use OpenTelemetry\API\Instrumentation\CachedInstrumentation;
 
 interface CakeHook
 {
-    public static function hook(CachedInstrumentation $instrumentation): CakeHook;
+	public static function hook(CachedInstrumentation $instrumentation): CakeHook;
 
-    public function instrument(): void;
+	public function instrument(): void;
 }

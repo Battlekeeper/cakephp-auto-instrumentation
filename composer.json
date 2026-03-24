@@ -43,12 +43,6 @@
       "_register.php"
     ]
   },
-  "autoload-dev": {
-    "psr-4": {
-      "OpenTelemetry\\Tests\\Instrumentation\\CakePHP\\": "tests/",
-      "OpenTelemetry\\Tests\\Instrumentation\\CakePHP\\Integration\\App\\": "tests/Integration/App"
-    }
-  },
   "config": {
     "allow-plugins": {
       "php-http/discovery": true
