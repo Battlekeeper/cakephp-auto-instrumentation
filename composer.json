@@ -1,5 +1,5 @@
 {
-  "name": "open-telemetry/opentelemetry-auto-cakephp",
+  "name": "battlekeeper/cakephp-auto-instrumentation",
   "description": "OpenTelemetry auto-instrumentation for CakePHP Framework.",
   "keywords": ["opentelemetry", "otel", "open-telemetry", "tracing", "cakephp", "instrumentation"],
   "type": "library",
