@@ -9,7 +9,9 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHook;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHookTrait;
-/** @disregard P1010 */
+/**
+ * @disregard P1010
+*/
 use function OpenTelemetry\Instrumentation\hook;
 use OpenTelemetry\SemConv\Attributes\CodeAttributes;
 use Throwable;
@@ -19,7 +21,9 @@ class Command implements CakeHook
 	use CakeHookTrait;
 
 	public function instrument(): void {
-		/** @disregard P1010 */
+		/**
+		 * @disregard P1010
+		*/
 		hook(
 			\Cake\Command\Command::class,
 			'execute',

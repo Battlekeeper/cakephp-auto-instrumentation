@@ -10,7 +10,9 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHook;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHookTrait;
-/** @disregard P1010 */
+/**
+ * @disregard P1010
+*/
 use function OpenTelemetry\Instrumentation\hook;
 use OpenTelemetry\SemConv\Attributes\HttpAttributes;
 use OpenTelemetry\SemConv\Attributes\NetworkAttributes;
@@ -21,13 +23,15 @@ class Controller implements CakeHook
 	use CakeHookTrait;
 
 	public function instrument(): void {
-		/** @disregard P1010 */
+		/**
+		 * @disregard P1010
+		*/
 		hook(
 			CakeController::class,
 			'invokeAction',
 			pre: function (CakeController $app, array $params, string $class, string $function, ?string $filename, ?int $lineno) {
 				$request = $app->getRequest();
-				$request = $this->buildSpan($request, $class, $function, $filename, $lineno);
+				$request = $this->buildSpan($request, $class, $function, $filename, $lineno, overrideSpanName: $request->getParam('controller'));
 				$app->setRequest($request);
 			},
 			post: static function (CakeController $app, array $params, $return, ?Throwable $exception) {

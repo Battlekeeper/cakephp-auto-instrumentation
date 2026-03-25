@@ -13,7 +13,9 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHook;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHookTrait;
-/** @disregard P1010 */
+/**
+ * @disregard P1010
+*/
 use function OpenTelemetry\Instrumentation\hook;
 use Throwable;
 
@@ -23,10 +25,10 @@ class Query implements CakeHook
 
 	public function instrument(): void {
 		/**
-         * Hook into the execute method of the Query class, which is called for all query types (select, update, insert, delete)
-         *
-         * @disregard P1010
-        */
+		 * Hook into the execute method of the Query class, which is called for all query types (select, update, insert, delete)
+		 *
+		 * @disregard P1010
+		*/
 		hook(
 			CakeQuery::class,
 			'execute',

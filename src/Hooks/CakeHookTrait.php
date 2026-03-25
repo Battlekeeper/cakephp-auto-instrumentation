@@ -52,15 +52,19 @@ trait CakeHookTrait
 	 * @return mixed
 	 * @psalm-suppress ArgumentTypeCoercion
 	 */
-	protected function buildSpan(?ServerRequestInterface $request, string $class, string $function, ?string $filename, ?int $lineno): mixed {
+	protected function buildSpan(?ServerRequestInterface $request, string $class, string $function, ?string $filename, ?int $lineno, ?string $overrideSpanName = null): mixed {
 		$root = $request
 			? $request->getAttribute(SpanInterface::class)
 			: \OpenTelemetry\API\Trace\Span::getCurrent();
-		$builder = $this->instrumentation->tracer()->spanBuilder(
-			$root
-				? sprintf('%s::%s', $class, $function)
-				: sprintf('%s', $request?->getMethod() ?? 'unknown')
-		)
+
+		$spanName = $root
+			? sprintf('%s::%s', $class, $function)
+			: sprintf('%s', $request?->getUri()->getPath() ?? 'unknown');
+		if ($overrideSpanName) {
+			$spanName = $overrideSpanName;
+		}
+
+		$builder = $this->instrumentation->tracer()->spanBuilder($spanName)
 			->setSpanKind(SpanKind::KIND_SERVER)
 			->setAttribute(CodeAttributes::CODE_FUNCTION_NAME, sprintf('%s::%s', $class, $function))
 			->setAttribute(CodeAttributes::CODE_FILE_PATH, $filename)

@@ -10,24 +10,29 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHook;
 use OpenTelemetry\Contrib\Instrumentation\CakePHP\Hooks\CakeHookTrait;
-/** @disregard P1010 */
+/**
+ * @disregard P1010
+*/
 use function OpenTelemetry\Instrumentation\hook;
 use OpenTelemetry\SemConv\Attributes\HttpAttributes;
 use OpenTelemetry\SemConv\Attributes\NetworkAttributes;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use OpenTelemetry\Contrib\Instrumentation\CakePHP\Server\Server as CakeServer;
 
 class Server implements CakeHook
 {
 	use CakeHookTrait;
 
 	public function instrument(): void {
-		/** @disregard P1010 */
+		/**
+		 * @disregard P1010
+		*/
 		hook(
-			\Cake\Http\Server::class,
+			CakeServer::class,
 			'run',
-			pre: function (\Cake\Http\Server $server, array $params, string $class, string $function, ?string $filename, ?int $lineno) {
+			pre: function (CakeServer $server, array $params, string $class, string $function, ?string $filename, ?int $lineno) {
 				$request = $params[0] ?? null;
 				assert($request === null || $request instanceof ServerRequestInterface);
 
@@ -35,7 +40,7 @@ class Server implements CakeHook
 
 				return [$request];
 			},
-			post: function (\Cake\Http\Server $server, array $params, ?ResponseInterface $response, ?Throwable $exception) {
+			post: function (CakeServer $server, array $params, ?ResponseInterface $response, ?Throwable $exception) {
 				$scope = Context::storage()->scope();
 				if (!$scope) {
 					return;
