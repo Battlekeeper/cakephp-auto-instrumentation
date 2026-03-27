@@ -14,6 +14,7 @@ use OpenTelemetry\SemConv\Attributes\UrlAttributes;
 use OpenTelemetry\SemConv\Attributes\HttpAttributes;
 use OpenTelemetry\SemConv\Attributes\UserAgentAttributes;
 use OpenTelemetry\SemConv\Attributes\ServerAttributes;
+use OpenTelemetry\SemConv\Attributes\DbAttributes;
 
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -95,12 +96,13 @@ trait CakeHookTrait
 		return $request;
 	}
 
-	protected function buildQuerySpan(string $repository, string $operation): SpanInterface {
+	protected function buildQuerySpan(string $repository, string $operation, string $query, bool $isInternal = false): SpanInterface {
 		$spanName = $repository . '::' . $operation;
 		$builder = $this->instrumentation->tracer()->spanBuilder($spanName);
-		$span = $builder->setSpanKind(SpanKind::KIND_CLIENT)
+		$span = $builder->setSpanKind($isInternal ? SpanKind::KIND_INTERNAL : SpanKind::KIND_CLIENT)
 				// this will be service.peer.name in the future but for now peer.service is more widely recognized
 				->setAttribute('peer.service', 'database')
+				->setAttribute(DbAttributes::DB_QUERY_TEXT, $query)
 				->startSpan();
 		$parent = Context::getCurrent();
 		Context::storage()->attach($span->storeInContext($parent));
