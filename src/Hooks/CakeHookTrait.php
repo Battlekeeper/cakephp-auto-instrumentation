@@ -96,17 +96,57 @@ trait CakeHookTrait
 		return $request;
 	}
 
-	protected function buildQuerySpan(string $repository, string $operation, string $query, bool $isInternal = false): SpanInterface {
+	protected function buildQuerySpan(string $repository, string $operation, string $query, bool $isInternal = false, ?string $file = null, ?int $line = null, ?string $func = null): SpanInterface {
 		$spanName = $repository . '::' . $operation;
-		$builder = $this->instrumentation->tracer()->spanBuilder($spanName);
-		$span = $builder->setSpanKind($isInternal ? SpanKind::KIND_INTERNAL : SpanKind::KIND_CLIENT)
+		$builder = $this->instrumentation->tracer()->spanBuilder($spanName)
+				->setSpanKind($isInternal ? SpanKind::KIND_INTERNAL : SpanKind::KIND_CLIENT)
 				// this will be service.peer.name in the future but for now peer.service is more widely recognized
 				->setAttribute('peer.service', 'database')
-				->setAttribute(DbAttributes::DB_QUERY_TEXT, $query)
-				->startSpan();
+				->setAttribute(DbAttributes::DB_QUERY_TEXT, $query);
+
+		if ($file) {
+			$builder->setAttribute(CodeAttributes::CODE_FILE_PATH, $file);
+		}
+		if ($line) {
+			$builder->setAttribute(CodeAttributes::CODE_LINE_NUMBER, $line);
+		}
+		if ($func) {
+			$builder->setAttribute(CodeAttributes::CODE_FUNCTION_NAME, $func);
+		}
+
+		$span = $builder->startSpan();
+
+
 		$parent = Context::getCurrent();
 		Context::storage()->attach($span->storeInContext($parent));
 		return $span;
+	}
+
+	protected function getCodeAttributesFromStackTrace(): array {
+		// 20 should be enough to get past the instrumentation and framework and into the user code
+		$stackTrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 21);
+		$depth = 0;
+
+		//remove first frame
+		array_shift($stackTrace);
+
+		for ($i = 0; $i < count($stackTrace); $i++) {
+			$depth++;
+			$trace = $stackTrace[$i];
+			if (!isset($trace['file'])) {
+				continue;
+			}
+			if (!str_starts_with($trace['file'], ROOT . '/vendor')) {
+				$caller = $trace;
+				break;
+			}
+		}
+
+		$file = $caller['file'] ? trim(str_replace(ROOT, '', $caller['file']), '/') : null;
+		$line = $caller['line'] ?? null;
+		$func = $caller['function'] ?? null;
+
+		return [$file, $line, $func];
 	}
 
 	protected function isRoot(): bool {

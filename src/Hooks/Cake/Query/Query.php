@@ -49,7 +49,8 @@ class Query implements CakeHook
 					$sql = 'unknown_query';
 				}
 
-				$this->buildQuerySpan($table, 'SELECT', $sql);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($table, 'SELECT', $sql, false, $file, $line, $func);
 			},
 			post: static function (CakeSelectQuery $Query, array $params, $return, ?Throwable $exception) {
 				$scope = Context::storage()->scope();
@@ -94,8 +95,8 @@ class Query implements CakeHook
 				if (preg_match('/^(UPDATE|INSERT INTO|DELETE FROM)\s+`??(\w+)`?\s+/i', $sql, $matches)) {
 					$table = $matches[2];
 				}
-
-				$this->buildQuerySpan($table, $method, $sql);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($table, $method, $sql, false, $file, $line, $func);
 			},
 			post: static function (CakeQuery $Query, array $params, $return, ?Throwable $exception) {
 				if ($Query instanceof CakeSelectQuery) {
@@ -126,7 +127,8 @@ class Query implements CakeHook
 			pre: function (CakeTable $Table, array $params, string $class, string $function, ?string $filename, ?int $lineno) {
 				// create span
 				$name = $Table->getAlias();
-				$this->buildQuerySpan($name, "SAVE", '', true);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($name, "SAVE", '', true, false, $file, $line, $func);
 			},
 			post: static function (CakeTable $Table, array $params, $return, ?Throwable $exception) {
 				$scope = Context::storage()->scope();
@@ -153,7 +155,8 @@ class Query implements CakeHook
 			pre: function (CakeTable $Table, array $params, string $class, string $function, ?string $filename, ?int $lineno) {
 				// create span
 				$name = $Table->getAlias();
-				$this->buildQuerySpan($name, "DELETE", '', true);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($name, "DELETE", '', true, $file, $line, $func);
 			},
 			post: static function (CakeTable $Table, array $params, $return, ?Throwable $exception) {
 				$scope = Context::storage()->scope();
@@ -184,7 +187,8 @@ class Query implements CakeHook
 				// create span
 				$event = $params[0];
 				$name = $Table->getAlias();
-				$this->buildQuerySpan($name, $event, '', true);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($name, $event, '', true, $file, $line, $func);
 			},
 			post: static function (CakeTable $Table, array $params, $return, ?Throwable $exception) {
 				if ($params[0] !== 'Model.beforeSave' && $params[0] !== 'Model.beforeDelete' && $params[0] !== 'Model.afterSave' && $params[0] !== 'Model.afterDelete') {
@@ -223,7 +227,8 @@ class Query implements CakeHook
 					$table = 'unknown_table';
 					$sql = 'unknown_query';
 				}
-				$this->buildQuerySpan($table, 'COUNT', $sql);
+				[$file, $line, $func] = $this->getCodeAttributesFromStackTrace();
+				$this->buildQuerySpan($table, 'COUNT', $sql, false, $file, $line, $func);
 			},
 			post: static function (CakeQuery $Query, array $params, $return, ?Throwable $exception) {
 				$scope = Context::storage()->scope();
